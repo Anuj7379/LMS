@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Library Management System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(to right, #a892c1, #c8c9cb);
+            color: #333;
+            transition: background 0.3s ease;
+        }
+        header {
+            background-color: rgba(0, 0, 0, 0.7);
+            color: #fff;
+            text-align: center;
+            padding: 20px;
+            position: relative;
+        }
+        header h1 {
+            margin: 0;
+            font-size: 2.5em;
+        }
+        main {
+            padding: 40px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            max-width: 1200px;
+            margin: 20px auto;
+            transition: background 0.3s ease;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .hidden {
+            display: none;
+        }
+        .form-control {
+            margin-bottom: 15px;
+            width: 100%;
+        }
+        input, button {
+            padding: 10px;
+            width: 100%;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            margin-top: 5px;
+            transition: border-color 0.3s;
+        }
+        input:focus {
+            border-color: #2575fc;
+            outline: none;
+        }
+        button {
+            background-color: #2575fc;
+            color: white;
+            cursor: pointer;
+            border: none;
+            font-weight: bold;
+        }
+        button:hover {
+            background-color: #1e5bbf;
+        }
+        h2, h3 {
+            color: #333;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .book-list {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr); /* Three columns */
+            gap: 20px;
+            margin-top: 20px;
+            max-height: 400px; /* Set a max height for scrolling */
+            overflow-y: auto; /* Enable vertical scrolling */
+        }
+        .book-card {
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            text-align: center;
+            transition: transform 0.2s ease;
+        }
+        .book-card:hover {
+            transform: translateY(-5px);
+        }
+        .book-title {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #0a0a0b;
+        }
+        .book-author {
+            font-size: 1em;
+            color: #555;
+        }
+        .book-isbn {
+            color: #777;
+        }
+        .borrowed-info {
+            background-color: #e9f7fd;
+            padding: 20px;
+            margin-top: 20px;
+            border-radius: 10px;
+            width: 100%;
+        }
+        .borrowed-info ul {
+            padding-left: 0;
+            list-style-type: none;
+        }
+        .borrowed-info li {
+            padding: 10px;
+            background-color: #fff;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        .borrowed-info li span {
+            color: #333;
+        }
+        footer {
+            background-color: rgba(0, 0, 0, 0.7);
+            color: #fff;
+            text-align: center;
+            padding: 15px;
+            position: relative;
+            bottom: 0;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Library Management System</h1>
+    </header>
+    <main id="main-content">
+        <div class="container">
+            <!-- Auth Section -->
+            <div id="auth-section">
+                <div id="login-section">
+                    <h2>Login</h2>
+                    <div class="form-control">
+                        <input type="text" id="login-username" placeholder="Username" required>
+                    </div>
+                    <div class="form-control">
+                        <input type="password" id="login-password" placeholder="Password" required>
+                    </div>
+                    <button onclick="login()">Login</button>
+                    <p>Don't have an account? <button onclick="toggleToRegister()">Sign Up</button></p>
+                </div>
+
+                <!-- Register Form -->
+                <div id="register-section" class="hidden">
+                    <h2>Sign Up</h2>
+                    <div class="form-control">
+                        <input type="text" id="register-username" placeholder="Username" required>
+                    </div>
+                    <div class="form-control">
+                        <input type="password" id="register-password" placeholder="Password" required>
+                    </div>
+                    <button onclick="register()">Sign Up</button>
+                    <p>Already have an account? <button onclick="toggleToLogin()">Login</button></p>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div id="content" class="hidden">
+                <h2>Welcome to the Library!</h2>
+
+                <h3>Add Book</h3>
+                <div class="form-control">
+                    <input type="text" id="title" placeholder="Book Title" required>
+                </div>
+                <div class="form-control">
+                    <input type="text" id="author" placeholder="Author" required>
+                </div>
+                <div class="form-control">
+                    <input type="text" id="isbn" placeholder="ISBN" required>
+                </div>
+                <button onclick="addBook()">Add Book</button>
+
+                <h3>Search Books</h3>
+                <div class="form-control">
+                    <input type="text" id="search-query" placeholder="Search by title, author, or ISBN">
+                </div>
+                <button onclick="searchBooks()">Search</button>
+
+                <h3>Available Books</h3>
+                <div class="book-list" id="book-list"></div>
+
+                <h3>Borrow/Return Book</h3>
+                <div class="form-control">
+                    <input type="text" id="borrow-isbn" placeholder="Enter ISBN to borrow/return" required>
+                </div>
+                <button onclick="borrowBook()">Borrow Book</button>
+                <button onclick="returnBook()">Return Book</button>
+
+                <div class="borrowed-info" id="borrowed-info" style="display: none;">
+                    <h3>Your Borrowed Books</h3>
+                    <ul id="borrowed-books-list"></ul>
+                </div>
+            </div>
+        </div>
+    </main>
+    <footer>
+        <p>&copy; 2023 Library Management System. All rights reserved.</p>
+    </footer>
+
+    <script>
+        async function login() {
+            const username = document.getElementById("login-username").value;
+            const password = document.getElementById("login-password").value;
+
+            try {
+                const response = await fetch("http://127.0.0.1:5000/login", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    credentials: "include",
+                    body: JSON.stringify({ username, password }),
+                });
+
+                const result = await response.json();
+                if (response.ok) {
+                    alert(result.message);
+                    document.getElementById("auth-section").classList.add("hidden");
+                    document.getElementById("content").classList.remove("hidden");
+                    document.getElementById("main-content").style.background = "none"; // Remove background after login
+                    listBooks();
+                    loadBorrowedBooks();
+                } else {
+                    alert(result.message || "Login failed. Please try again.");
+                }
+            } catch (error) {
+                alert("An error occurred while logging in. Please try again later.");
+            }
+        }
+
+        async function register() {
+            const username = document.getElementById("register-username").value;
+            const password = document.getElementById("register-password").value;
+
+            try {
+                const response = await fetch("http://127.0.0.1:5000/register", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ username, password }),
+                });
+
+                const result = await response.json();
+                if (response.ok) {
+                    alert(result.message);
+                    toggleToLogin();
+                } else {
+                    alert(result.message || "Registration failed. Please try again.");
+                }
+            } catch (error) {
+                alert("An error occurred while registering. Please try again later.");
+            }
+        }
+
+        function toggleToRegister() {
+            document.getElementById("login-section").classList.add("hidden");
+            document.getElementById("register-section").classList.remove("hidden");
+        }
+
+        function toggleToLogin() {
+            document.getElementById("register-section").classList.add("hidden");
+            document.getElementById("login-section").classList.remove("hidden");
+        }
+
+        async function listBooks() {
+            try {
+                const response = await fetch("http://127.0.0.1:5000/list_books", {
+                    method: "GET",
+                    credentials: "include",
+                });
+
+                if (response.ok) {
+                    const books = await response.json();
+                    const bookList = document.getElementById("book-list");
+                    bookList.innerHTML = "";
+                    if (books.length === 0) {
+                        bookList.innerHTML = "<p>No books available.</p>";
+                    } else {
+                        books.forEach(book => {
+                            const card = document.createElement("div");
+                            card.classList.add("book-card");
+                            card.innerHTML = `
+                                <h4 class="book-title">${book.title}</h4>
+                                <p class="book-author">${book.author}</p>
+                                <p class="book-isbn">ISBN: ${book.isbn}</p>
+                            `;
+                            bookList.appendChild(card);
+                        });
+                    }
+                } else {
+                    alert("Failed to fetch books.");
+                }
+            } catch (error) {
+                alert("An error occurred while fetching books. Please try again later.");
+            }
+        }
+
+        async function searchBooks() {
+            const query = document.getElementById("search-query").value;
+
+            try {
+                const response = await fetch(`http://127.0.0.1:5000/search_books?query=${encodeURIComponent(query)}`, {
+                    method: "GET",
+                    credentials: "include",
+                });
+
+                if (response.ok) {
+                    const books = await response.json();
+                    const bookList = document.getElementById("book-list");
+                    bookList.innerHTML = "";
+                    if (books.length === 0) {
+                        bookList.innerHTML = "<p>No matching books found.</p>";
+                    } else {
+                        books.forEach(book => {
+                            const card = document.createElement("div");
+                            card.classList.add("book-card");
+                            card.innerHTML = `
+                                <h4 class="book-title">${book.title}</h4>
+                                <p class="book-author">${book.author}</p>
+                                <p class="book-isbn">ISBN: ${book.isbn}</p>
+                            `;
+                            bookList.appendChild(card);
+                        });
+                    }
+                } else {
+                    alert("Failed to search books.");
+                }
+            } catch (error) {
+                alert("An error occurred while searching for books. Please try again later.");
+            }
+        }
+
+        async function addBook() {
+            const title = document.getElementById("title").value;
+            const author = document.getElementById("author").value;
+            const isbn = document.getElementById("isbn").value;
+
+            try {
+                const response = await fetch("http://127.0.0.1:5000/add_book", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    credentials: "include",
+                    body: JSON.stringify({ title, author, isbn }),
+                });
+
+                if (response.ok) {
+                    alert("Book added successfully");
+                    listBooks();
+                } else {
+                    alert("Failed to add book.");
+                }
+            } catch (error) {
+                alert("An error occurred while adding the book. Please try again later.");
+            }
+        }
+
+        async function borrowBook() {
+            const isbn = document.getElementById("borrow-isbn").value;
+
+            try {
+                const response = await fetch("http://127.0.0.1:5000/borrow_book", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    credentials: "include",
+                    body: JSON.stringify({ isbn }),
+                });
+
+                const result = await response.json();
+                if (response.ok) {
+                    alert(result.message);
+                    listBooks();
+                    loadBorrowedBooks();
+                } else {
+                    alert(result.message || "Failed to borrow book.");
+                }
+            } catch (error) {
+                alert("An error occurred while borrowing the book. Please try again later.");
+            }
+        }
+
+        async function returnBook() {
+            const isbn = document.getElementById("borrow-isbn").value;
+
+            try {
+                const response = await fetch("http://127.0.0.1:5000/return_book", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    credentials: "include",
+                    body: JSON.stringify({ isbn }),
+                });
+
+                const result = await response.json();
+                if (response.ok) {
+                    alert(result.message);
+                    listBooks();
+                    loadBorrowedBooks();
+                } else {
+                    alert(result.message || "Failed to return book.");
+                }
+            } catch (error) {
+                alert("An error occurred while returning the book. Please try again later.");
+            }
+        }
+
+        async function loadBorrowedBooks() {
+            try {
+                const response = await fetch("http://127.0.0.1:5000/borrowed_books", {
+                    method: "GET",
+                    credentials: "include",
+                });
+
+                if (response.ok) {
+                    const borrowedBooks = await response.json();
+                    const borrowedBooksList = document.getElementById("borrowed-books-list");
+                    borrowedBooksList.innerHTML = "";
+                    if (borrowedBooks.length === 0) {
+                        document.getElementById("borrowed-info").style.display = "none";
+                    } else {
+                        document.getElementById("borrowed-info").style.display = "block";
+                        borrowedBooks.forEach(borrowedBook => {
+                            const li = document.createElement("li");
+                            li.innerHTML = `${borrowedBook.title} (ISBN: ${borrowedBook.isbn}) - <span>Borrowed on: ${new Date(borrowedBook.borrow_date).toLocaleString()}</span>`;
+                            borrowedBooksList.appendChild(li);
+                        });
+                    }
+                }
+            } catch (error) {
+                alert("An error occurred while loading borrowed books. Please try again later.");
+            }
+        }
+
+        window.onload = function() {
+            document.getElementById("auth-section").classList.remove("hidden");
+        }
+    </script>
+</body>
+</html>
